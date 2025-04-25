@@ -1,0 +1,43 @@
+{
+  "name": "prct11-witcher-api-grupot",
+  "version": "1.0.0",
+  "description": "[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/iigoPlD8) [![Open in Codespaces](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)](https://classroom.github.com/open-in-codespaces?assignment_repo_id=19278585)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc-watch --onSuccess \"node dist/modi/Operations.js\"",
+    "doc": "typedoc",
+    "test": "vitest run",
+    "onetest": "vitest run test/modi",
+    "testmodi": "vitest run test/modi",
+    "testpract7": "vitest run test/practica7modi",
+    "coverage": "vitest run --coverage"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ULL-ESIT-INF-DSI-2425/prct11-witcher-api-grupot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ULL-ESIT-INF-DSI-2425/prct11-witcher-api-grupot/issues"
+  },
+  "homepage": "https://github.com/ULL-ESIT-INF-DSI-2425/prct11-witcher-api-grupot#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.25.1",
+    "@types/express": "^5.0.1",
+    "@vitest/coverage-v8": "^3.1.2",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-tsdoc": "^0.4.0",
+    "globals": "^16.0.0",
+    "prettier": "^3.5.3",
+    "typedoc": "^0.28.3",
+    "typescript-eslint": "^8.31.0",
+    "vitest": "^3.1.2"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
