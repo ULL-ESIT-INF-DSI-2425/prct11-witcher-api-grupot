@@ -2,7 +2,7 @@ import inquirer from "inquirer";
 import { GoodsManager } from "./goodsManager.js";
 import { Good } from "./goods.js";
 import { MerchantManager } from "./mercant_manager.js";
-import { CustomerManager } from "./customer_manager.js";
+import { CustomerManager } from "./customerManager.js";
 // import { Merchant } from './mercants.js';
 // import { Customer } from './other_clients.js';
 import { TransactionManager } from './transaction_manager.js';
