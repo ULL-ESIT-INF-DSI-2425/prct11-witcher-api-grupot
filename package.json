@@ -10,7 +10,8 @@
     "onetest": "vitest run test/modi",
     "testmodi": "vitest run test/modi",
     "testpract7": "vitest run test/practica7modi",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "start": "node dist/index.js"
   },
   "type": "module",
   "repository": {

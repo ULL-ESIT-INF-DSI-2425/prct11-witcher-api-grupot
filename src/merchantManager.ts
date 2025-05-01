@@ -1,4 +1,4 @@
-import { Merchant } from './models/merchant.js';
+import { Merchant } from './merchant.js';
 
 
 export class MerchantManager {
@@ -8,6 +8,12 @@ export class MerchantManager {
     return merchant;
   }
 
+  async findByIdAndUpdate(id: string, updateData: { name?: string; type?: string; location?: string }) {
+    return await Merchant.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+  }
 
   async removeMerchantById(id: string) {
     return await Merchant.findByIdAndDelete(id);
@@ -44,6 +50,3 @@ export class MerchantManager {
     return await Merchant.findOne({ name });
   }
 }
-
-
-

@@ -10,7 +10,7 @@ const manager = new CustomerManager();
 
 app.use(express.json());
 
-const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://<username>:<password>@<cluster-url>/<database-name>?retryWrites=true&w=majority';
+const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://alu0101545455:@clusterprincipal.mkyvmkc.mongodb.net/?retryWrites=true&w=majority&appName=ClusterPrincipal';
 
 // Conectarse a MongoDB ATLAS
 mongoose.connect(mongoURI)
