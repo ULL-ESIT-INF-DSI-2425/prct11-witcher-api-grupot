@@ -1,4 +1,4 @@
-import { Merchant } from './merchant.js';
+import { Merchant } from './models/merchant.js';
 
 
 export class MerchantManager {

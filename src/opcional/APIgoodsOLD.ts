@@ -11,7 +11,7 @@ const manager = new GoodManager();
 
 app.use(express.json());
 
-const mongoURI = process.env.MONGODB_URI ||   "mongodb+srv://alu0101545455:@clusterprincipal.mkyvmkc.mongodb.net/?retryWrites=true&w=majority&appName=ClusterPrincipal";
+const mongoURI = process.env.MONGODB_URI || "mongodb+srv://alu0101545455:@clusterprincipal.mkyvmkc.mongodb.net/?retryWrites=true&w=majority&appName=ClusterPrincipal";
 
 // Conectarse a MongoDB ATLAS
 mongoose.connect(mongoURI)

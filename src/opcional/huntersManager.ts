@@ -1,4 +1,4 @@
-import { Hunter } from './hunters.js'; 
+import { Hunter } from '../models/hunters.js'; 
 
 export class CustomerManager {
 

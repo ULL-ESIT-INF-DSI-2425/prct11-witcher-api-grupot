@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Transaction, TransactionDocumentInterface, TransactionItemInterface } from './transactions.js';
-import { Good } from './goods.js';
-import { Hunter } from './hunters.js';
-import { Merchant } from './merchant.js';
+import { Transaction, TransactionDocumentInterface, TransactionItemInterface } from './models/transactions.js';
+import { Good } from './models/goods.js';
+import { Hunter } from './models/hunters.js';
+import { Merchant } from './models/merchant.js';
 import { Types } from 'mongoose';
 
 export class TransactionManager {

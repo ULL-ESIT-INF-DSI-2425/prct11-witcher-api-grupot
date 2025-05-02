@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Good, GoodDocumentInterface } from './goods.js';
+import { Good, GoodDocumentInterface } from '../models/goods.js';
 
 export class GoodManager {
 
