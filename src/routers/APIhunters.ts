@@ -279,7 +279,7 @@ APIhunter.get("/hunters/:username/:race", async (req, res) => {
  * @returns {401 Unauthorized} Token de autenticación no proporcionado o inválido.
  *
  * @example
- * POST /hunters/john_doe/6818e84ab66205e8b1ed04f0
+ * PATCH /hunters/john_doe/6818e84ab66205e8b1ed04f0
  * {
  *   "name": Geralt,
  *   "race": ~~"Human"~~ "Vampire",
