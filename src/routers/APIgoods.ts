@@ -3,6 +3,9 @@ import { Good } from '../models/goods.js';
 import { User } from "../models/users.js";
 export const APIgoods = express.Router();
 
+/**
+ * Método post para añadir bienes a la base de datos
+ */
 APIgoods.post("/goods/:username", async (req, res) => {
   try {
     const user = await User.findOne({
@@ -31,6 +34,10 @@ APIgoods.post("/goods/:username", async (req, res) => {
   }
 });
 
+/**
+ * Método Get para obtener todos los bienes almacenados en la 
+ * base de datos
+ */
 APIgoods.get("/goods/:username", async (req, res) => {
   try {
     const user = await User.findOne({
@@ -60,6 +67,10 @@ APIgoods.get("/goods/:username", async (req, res) => {
   }
 });
 
+/**
+ * Método Get que permite obtener un bien específico mediante su
+ * id (asignado por parte de la base de datos)
+ */
 APIgoods.get("/goods/:username/:id", async (req, res) => {
   try {
     const user = await User.findOne({
@@ -90,7 +101,9 @@ APIgoods.get("/goods/:username/:id", async (req, res) => {
   }
 });
 
-
+/**
+ * Método Get que permite obtener un bien específico mediante su nombre
+ */
 APIgoods.get("/goods/:username/:name", async (req, res) => {
   try {
     const user = await User.findOne({
@@ -121,6 +134,10 @@ APIgoods.get("/goods/:username/:name", async (req, res) => {
   }
 });
 
+/**
+ * Método Get que permite obtener los objetos almacenados mediante
+ * su categoría asignada 
+ */
 APIgoods.get("/goods/:username/:category", async (req, res) => {
   try {
     const user = await User.findOne({
@@ -151,6 +168,10 @@ APIgoods.get("/goods/:username/:category", async (req, res) => {
   }
 });
 
+/**
+ * Método Get que permite obtener los bienes por un 
+ * determinado material
+ */
 APIgoods.get("/goods/:username/:material", async (req, res) => {
   try {
     const user = await User.findOne({
@@ -181,6 +202,10 @@ APIgoods.get("/goods/:username/:material", async (req, res) => {
   }
 });
 
+/**
+ * Método Patch que utiliza el id del objeto para actualizar sus parametros
+ * (id asignado automaticamente por la base de datos)
+ */
 APIgoods.patch("/goods/:username/:id", async (req, res) => {
   try {
     const user = await User.findOne({
@@ -192,7 +217,7 @@ APIgoods.patch("/goods/:username/:id", async (req, res) => {
         error: "No se encontró al usuario",
       });
     } else {
-      const allowedUpdates = ["name", "location", "breed"];
+      const allowedUpdates = ["name", "description", "category", "material", "value", "stock", "weight"];
       const actualUpdates = Object.keys(req.body);
       const isValidUpdate = actualUpdates.every((update) =>
         allowedUpdates.includes(update),
@@ -230,6 +255,10 @@ APIgoods.patch("/goods/:username/:id", async (req, res) => {
   }
 });
 
+/**
+ * Método Delete que permite eliminar un bien mediante su 
+ * id de base de datos 
+ */
 APIgoods.delete("/goods/:username/:id", async (req, res) => {
   try {
     const user = await User.findOne({
