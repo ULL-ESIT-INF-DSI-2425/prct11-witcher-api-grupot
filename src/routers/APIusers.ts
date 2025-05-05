@@ -33,6 +33,7 @@ APIuser.get("/users", async (req, res) => {
   }
 });
 
+// cambiar de query a ruta indirecta /users/:username
 APIuser.patch("/users", async (req, res) => {
   if (!req.query.username) {
     res.status(400).send({

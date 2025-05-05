@@ -1,12 +1,14 @@
 import { Schema, model, Document } from 'mongoose';
+import { UserDocumentInterface } from './users.js';
 
 /**
  * Interfaz que define la estructura del documento
  */
 export interface HunterDocumentInterface extends Document {
-  name: string;
-  race: 'Human' | 'Elf' | 'Dwarf' | 'Orc' | 'Goblin' | 'Vampire' | 'Werewolf' | 'Demon' | 'Undead';
-  location: string;
+  name: string,
+  race: 'Human' | 'Elf' | 'Dwarf' | 'Orc' | 'Goblin' | 'Vampire' | 'Werewolf' | 'Demon' | 'Undead',
+  location: string,
+  owner: UserDocumentInterface,
 }
 
 /**
@@ -16,7 +18,7 @@ const HunterSchema = new Schema<HunterDocumentInterface>({
   name: {
     type: String,
     required: [true, 'Name is required'],
-    trim: true, // elimina espacios en blanco
+    trim: true, 
     minlength: [1, 'Name must be at least 1 character'],
   },
   race: {
@@ -33,6 +35,11 @@ const HunterSchema = new Schema<HunterDocumentInterface>({
     minlength: [2, 'Location must be at least 2 characters'],
     trim: true,
   },
+  owner: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'User'
+  }
 });
 
 /**
