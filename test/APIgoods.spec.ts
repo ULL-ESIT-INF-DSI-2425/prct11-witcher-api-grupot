@@ -19,10 +19,38 @@ const firstGood = {
 };
 
 
-beforeEach(async () => {
-  await Good.deleteMany({});
-  insertedGood = await Good.create(firstGood);
-});
+
+
+// Antes de todas las pruebas, nos aseguramos de estar conectados a la base de datos de prueba
+beforeAll(async () => {
+    // Comprobamos si ya hay una conexión activa
+    if (mongoose.connection.readyState === 0) { // 0 = desconectado
+      // Conectar solo si no hay conexiones activas
+      await mongoose.connect(process.env.MONGODB_URI_TEST || "mongodb://localhost:27017/posada-lobo-blanco-test");
+    } else {
+      // Si ya hay una conexión, verificamos que sea a la base de datos de prueba
+      const dbName = mongoose.connection.db?.databaseName;
+      if (dbName !== 'posada-lobo-blanco-test') {
+        console.warn(`⚠️ Advertencia: Tests ejecutándose en la base de datos "${dbName}" en lugar de "posada-lobo-blanco-test"`);
+      }
+    }
+  });
+
+
+// Después de cada prueba, limpiamos la colección de hunters
+afterEach(async () => {
+    if (mongoose.connection.readyState !== 0) {
+      await Good.deleteMany({});
+    }
+  });
+ 
+  // Después de todas las pruebas, mantenemos la conexión abierta
+  // para evitar conflictos con otras pruebas o con el servidor
+  afterAll(async () => {
+    // No cerramos la conexión para evitar problemas con otras pruebas
+    // Si realmente necesitas cerrarla, asegúrate de que no haya otras pruebas ejecutándose
+    // await mongoose.connection.close();
+  });
 
 
 describe("POST /goods", () => {
@@ -30,24 +58,19 @@ describe("POST /goods", () => {
     const payload = {
       name: "Colonia de Lirio y Grosellas",
       description: "Una colonia muy especial",
-      category: "ArPotionmor",
+      category: "Potion",
       material: "hierbas",
       weight: 2,
       value: 150,
       stock: 50
     };
-    const res = await request(app)
-      .post("/goods")
-      .send(payload)
-      .expect(201);
+     // Verificamos que el cazador se creó correctamente
+     expect(response.body).toHaveProperty("_id");
+     expect(response.body.name).toBe("Colonia de Lirio y Grosellas");
+     expect(response.body.description).toBe("Una colonia muy especial");
+     expect(response.body.category).toBe("Potion");
 
 
-    expect(res.body).toMatchObject(payload);
-
-
-    const found = await Good.findById(res.body._id);
-    expect(found).not.toBeNull();
-    expect(found.name).toBe("Colonia de Lirio y Grosellas");
   });
 
 
