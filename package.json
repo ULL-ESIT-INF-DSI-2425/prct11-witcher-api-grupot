@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsc-watch --onSuccess \"node dist/modi/Operations.js\"",
     "doc": "typedoc",
-    "test": "vitest run",
+    "test": "env-cmd -f ./config/test.env vitest run",
     "onetest": "vitest run test/modi",
     "testmodi": "vitest run test/modi",
     "testpract7": "vitest run test/practica7modi",
