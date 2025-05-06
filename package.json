@@ -46,6 +46,7 @@
     "express": "^5.1.0",
     "mongodb": "^6.16.0",
     "mongoose": "^8.13.3",
+    "tsc-watch": "^6.2.1",
     "validator": "^13.15.0"
   }
 }

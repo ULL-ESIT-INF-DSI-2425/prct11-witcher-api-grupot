@@ -22,8 +22,6 @@ interface CreateTransactionRequestBody {
  * Crear una nueva transacción
  */
 export const createTransaction = async (req: Request, res: Response) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
     const { transactionType, personName, items } = req.body as CreateTransactionRequestBody;
 
@@ -38,20 +36,19 @@ export const createTransaction = async (req: Request, res: Response) => {
     // Buscar la persona (cazador o mercader) según el tipo de transacción
     let person;
     if (transactionType === 'purchase') {
-      person = await Hunter.findOne({ name: personName }).session(session);
+      person = await Hunter.findOne({ name: personName });
     } else {
-      person = await Merchant.findOne({ name: personName }).session(session);
+      person = await Merchant.findOne({ name: personName });
     }
-    const personType = person instanceof Hunter ? 'Hunter' : 'Merchant';
 
     if (!person) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(404).json({
         success: false,
-        message: `${personType} con nombre ${personName} no encontrado`
+        message: `${personName} no encontrado`
       });
     }
+
+    const personType = person instanceof Hunter ? 'Hunter' : 'Merchant';
 
     // Procesar los ítems de la transacción
     const transactionItems: TransactionItemInterface[] = [];
@@ -61,18 +58,14 @@ export const createTransaction = async (req: Request, res: Response) => {
     if (transactionType === 'purchase') {
       // Verificar que existen todos los bienes y hay stock suficiente
       for (const item of items) {
-        const good = await Good.findOne({ name: item.goodName }).session(session);
+        const good = await Good.findOne({ name: item.goodName });
         if (!good) {
-          await session.abortTransaction();
-          session.endSession();
           return res.status(404).json({
             success: false,
             message: `Bien ${item.goodName} no encontrado`
           });
         }
         if (good.stock < item.quantity) {
-          await session.abortTransaction();
-          session.endSession();
           return res.status(400).json({
             success: false,
             message: `Stock insuficiente para ${item.goodName}. Disponible: ${good.stock}, Solicitado: ${item.quantity}`
@@ -80,7 +73,7 @@ export const createTransaction = async (req: Request, res: Response) => {
         }
         // Actualizar el stock del bien
         good.stock -= item.quantity;
-        await good.save({ session });
+        await good.save();
         // Añadir ítem a la transacción - usando value como precio
         transactionItems.push({
           goodId: good._id as Types.ObjectId,
@@ -88,17 +81,16 @@ export const createTransaction = async (req: Request, res: Response) => {
           quantity: item.quantity,
           unitPrice: good.value
         });
-
-        totalAmount += item.quantity * good.value;
+        totalAmount += item.quantity;
       }
     } else { // Si es una venta (merchant vende a la posada)
       for (const item of items) {
         // Buscar si el bien ya existe
-        let good = await Good.findOne({ name: item.goodName }).session(session);
+        let good = await Good.findOne({ name: item.goodName })
         if (good) {
           // Si el bien existe, actualizar su stock
           good.stock += item.quantity;
-          await good.save({ session });
+          await good.save();
         } else {
           // Si el bien no existe, se crea
           good = new Good({
@@ -110,7 +102,7 @@ export const createTransaction = async (req: Request, res: Response) => {
             stock: item.quantity,
             weight: 1 // Peso por defecto
           });
-          await good.save({ session });
+          await good.save();
         }
 
         // Añadir ítem a la transacción - usamos un precio de compra ligeramente menor al valor del bien
@@ -135,22 +127,14 @@ export const createTransaction = async (req: Request, res: Response) => {
       totalAmount,
       date: new Date()
     });
-    await newTransaction.save({ session });
+    await newTransaction.save();
     
-    // Confirmar la transacción en MongoDB
-    await session.commitTransaction();
-    session.endSession();
-
     return res.status(201).json({
       success: true,
       data: newTransaction
     });
 
   } catch (error) {
-    // Si hay algún error, abortar la transacción
-    await session.abortTransaction();
-    session.endSession();
-    
     console.error('Error al crear la transacción:', error);
     return res.status(500).json({
       success: false,
