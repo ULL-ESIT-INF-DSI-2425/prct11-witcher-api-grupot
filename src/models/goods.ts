@@ -19,7 +19,6 @@ export interface GoodDocumentInterface extends Document {
   value: number;
   stock: number;
   weight: number;
-  //owner: UserDocumentInterface;
 }
 
 /**
@@ -77,11 +76,6 @@ const GoodSchema = new Schema<GoodDocumentInterface>({
     min: [0, "El peso no puede ser negativo"],
     default: 1,
   }
-  // owner: {
-  //   type: Schema.Types.ObjectId,
-  //   required: true,
-  //   ref: "User",
-  // },
 });
 
 export const Good = model<GoodDocumentInterface>("Good", GoodSchema);
