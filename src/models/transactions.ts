@@ -12,7 +12,7 @@ export interface TransactionItemInterface {
 
 /**
  * Interfaz que define la estructura del documento de transacción
-*/
+ */
 export interface TransactionDocumentInterface extends Document {
   transactionType: 'purchase' | 'sale';
   personId: Types.ObjectId;
@@ -20,10 +20,11 @@ export interface TransactionDocumentInterface extends Document {
   personName: string;
   items: TransactionItemInterface[];
   totalAmount: number;
+  date: Date; 
 }
 
 /**
- * Esquema para items en transacciones
+ * Esquema para items en transacciones 
  */
 const TransactionItemSchema = new Schema<TransactionItemInterface>({
   goodId: {
@@ -49,7 +50,7 @@ const TransactionItemSchema = new Schema<TransactionItemInterface>({
 
 /**
  * Esquema de Mongoose para transacciones
-*/
+ */
 const TransactionSchema = new Schema<TransactionDocumentInterface>(
   {
     transactionType: {
@@ -92,6 +93,11 @@ const TransactionSchema = new Schema<TransactionDocumentInterface>(
       type: Number,
       required: [true, 'El importe total es obligatorio'],
       min: [0, 'El importe total no puede ser negativo']
+    },
+    date: {
+      type: Date,
+      default: Date.now,
+      required: [true, 'La fecha de la transacción es obligatoria']
     }
   }
 );

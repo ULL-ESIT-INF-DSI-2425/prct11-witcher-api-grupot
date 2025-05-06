@@ -1,5 +1,6 @@
 import express from 'express';
 import { Hunter } from '../models/hunters.js';
+
 export const APIhunter = express.Router();
 
 /**
