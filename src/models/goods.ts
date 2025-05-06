@@ -1,5 +1,4 @@
 import { Schema, model, Document } from "mongoose";
-//import { UserDocumentInterface } from "./users.js";
 
 /**
  * Interfaz que define la estructura del documento de bien

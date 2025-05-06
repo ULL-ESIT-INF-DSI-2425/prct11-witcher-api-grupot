@@ -1,123 +1,93 @@
 import express from 'express';
 import { Merchant } from '../models/merchant.js';
-import { User } from "../models/users.js";
+
 export const APImerchant = express.Router();
 
 /**
- * @route POST /merchants/:username
- * @description Crea un nuevo mercader asociado al nombre de usuario proporcionado.
+ * @route POST /merchant
+ * @description Crea un mercader asociado al nombre de usuario proporcionado.
  *
- * @param {string} req.params.username - Nombre de usuario asociado.
- * @param {string} req.body.name - Nombre del mercader.
- * @param {string} req.body.race - Raza del mercader.
- * @param {string} req.body.location - Localización del mercader.
- * @param {string} req.body.type - Tipo o especialidad del mercader.
+ * @param {string} req.body.name - Nombre del mercader (requerido).
+ * @param {string} req.body.type - Tipo del mercader (requerido; Options: 'Blacksmith' | 'Alchemist' | 'Armorer' | 'Herbalist' | 'General Goods' | 'Weapons' | 'Other').
+ * @param {string} req.body.location - Localización del mercader (requerido).
  *
- * @returns {201 Created} Mercader creado correctamente.
- * @returns {404 Not Found} Usuario no encontrado.
- * @returns {500 Internal Server Error} Error interno del servidor.
+ * @returns {201 Created} Hunter creado correctamente.
+ * @returns {400 Bad Request} Faltan campos requeridos en el cuerpo de la petición.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * POST /merchants
+ * {
+ *   "name": "Geralt",
+ *   "type": "General",
+ *   "location": "Astera"
+ * }
  */
-APImerchant.post("/merchants/:username", async (req, res) => {
+APImerchant.post("/merchants", async (req, res) => {
   try {
-    const user = await User.findOne({
-      username: req.params.username,
+    const merchant = new Merchant({
+      ...req.body
     });
 
-    if (!user) {
-      res.status(404).send({
-        error: "No se encontró al usuario",
-      });
-    } else {
-      const merchant = new Merchant({
-        ...req.body
-      });
-
-      await merchant.save();
-      await merchant.populate({
-        path: "owner",
-        select: ["username"],
-      });
-      res.status(201).send(merchant);
-    }
+    await merchant.save();
+    res.status(201).send(merchant);
   } catch (error) {
     res.status(500).send(error);
   }
 });
 
 /**
- * @route GET /merchants/:username
- * @description Obtiene todos los mercaderes asociados al nombre de usuario proporcionado.
- *
- * @param {string} req.params.username - Nombre de usuario asociado.
+ * @route GET /merchants
+ * @description Obtiene todos los mercaderes
  *
  * @returns {200 OK} Lista de mercaderes.
- * @returns {404 Not Found} Usuario no encontrado o sin mercaderes asociados.
- * @returns {500 Internal Server Error} Error interno del servidor.
+ * @returns {404 Not Found} No hay mercaderes registrados.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * GET /merchants
  */
-APImerchant.get("/merchants/:username", async (req, res) => {
+APImerchant.get("/merchants", async (req, res) => {
   try {
-    const user = await User.findOne({
-      username: req.params.username,
-    });
+    const merchants = await Merchant.find();
 
-    if (!user) {
-      res.status(404).send({
-        error: "No se encontró al usuario",
-      });
+    if (merchants.length !== 0) {
+      res.send(merchants);
     } else {
-      const merchants = await Merchant.find({
-        owner: user._id,
-      }).populate({
-        path: "owner",
-        select: ["username"],
+      res.status(404).send({
+        error: "No hay cazadores registrados",
       });
-
-      if (merchants.length !== 0) {
-        res.send(merchants);
-      } else {
-        res.status(404).send();
-      }
     }
   } catch (error) {
     res.status(500).send(error);
-  };
+  }
 });
 
 /**
- * @route GET /merchants/:username/:id
- * @description Obtiene un mercader específico por su ID.
+ * @route GET /merchants/:id
+ * @description Obtiene un mercader registrado por su ID
  *
- * @param {string} req.params.username - Nombre de usuario asociado.
- * @param {string} req.params.id - ID del mercader.
+ * @param {string} req.params.id - Id del mercader que se quiere consultar.
  *
  * @returns {200 OK} Mercader encontrado.
- * @returns {404 Not Found} Usuario o mercader no encontrado.
- * @returns {500 Internal Server Error} Error interno del servidor.
+ * @returns {404 Not Found} No se encontró el mercader.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * GET /merchant/6818e84ab66205e8b1ed04f0
  */
-APImerchant.get("/merchants/:username/:id", async (req, res) => {
+APImerchant.get("/merchants/:id", async (req, res) => {
   try {
-    const user = await User.findOne({
-      username: req.params.username,
+    const merchant = await Merchant.findOne({
+      _id: req.params.id,
     });
 
-  if (!user) {
-      res.status(404).send({
-        error: "No se encontró al usuario",
-      });
+    if (merchant) {
+      res.send(merchant);
     } else {
-      const merchant = await Merchant.findOne({
-        owner: user._id,
-        _id: req.params.id,
-      }).populate({
-        path: "owner",
-        select: ["username"],
+      res.status(404).send({
+        error: "No se encontró el cazador"
       });
-
-      if (merchant) {
-        res.send(merchant);
-      } else {
-        res.status(404).send();
-      }
     }
   } catch (error) {
     res.status(500).send(error);
@@ -125,40 +95,30 @@ APImerchant.get("/merchants/:username/:id", async (req, res) => {
 });
 
 /**
- * @route GET /merchants/:username/:name
- * @description Busca un mercader por su nombre.
+ * @route GET /merchant/name/:name
+ * @description Obtiene un mercader registrado por su nombre
  *
- * @param {string} req.params.username - Nombre de usuario asociado.
- * @param {string} req.params.name - Nombre del mercader.
+ * @param {string} req.params.name - Nombre del mercader a consultar.
  *
  * @returns {200 OK} Mercader encontrado.
- * @returns {404 Not Found} Usuario o mercader no encontrado.
- * @returns {500 Internal Server Error} Error interno del servidor.
+ * @returns {404 Not Found} No se encontró el mercader.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * GET /merchant/name/Geralt
  */
-APImerchant.get("/merchants/:username/:name", async (req, res) => {
+APImerchant.get("/merchants/name/:name", async (req, res) => {
   try {
-    const user = await User.findOne({
-      username: req.params.username,
+    const merchant = await Merchant.findOne({
+      name: req.params.name
     });
 
-    if (!user) {
-      res.status(404).send({
-        error: "No se encontró al usuario",
-      });
+    if (merchant) {
+      res.send(merchant);
     } else {
-      const merchant = await Merchant.findOne({
-        owner: user._id,
-        _id: req.params.name,
-      }).populate({
-        path: "owner",
-        select: ["username"],
+      res.status(404).send({
+        error: "No se encontró el cazador"
       });
-
-      if (merchant) {
-        res.send(merchant);
-      } else {
-        res.status(404).send();
-      }
     }
   } catch (error) {
     res.status(500).send(error);
@@ -166,40 +126,30 @@ APImerchant.get("/merchants/:username/:name", async (req, res) => {
 });
 
 /**
- * @route GET /merchants/:username/:location
- * @description Busca un mercader por su localización.
+ * @route GET /merchants/location/:location
+ * @description Obtiene los cazadores registrados por localización
  *
- * @param {string} req.params.username - Nombre de usuario asociado.
- * @param {string} req.params.location - Localización del mercader.
+ * @param {string} req.params.location - localización de los cazadores a consultar.
  *
- * @returns {200 OK} Mercader encontrado.
- * @returns {404 Not Found} Usuario o mercader no encontrado.
- * @returns {500 Internal Server Error} Error interno del servidor.
+ * @returns {200 OK} Lista de cazadores en esa localización.
+ * @returns {404 Not Found} No hay cazadores en esa localización.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * GET /merchants/location/Astera
  */
-APImerchant.get("/merchants/:username/:location", async (req, res) => {
+APImerchant.get("/merchants/location/:location", async (req, res) => {
   try {
-    const user = await User.findOne({
-      username: req.params.username,
+    const merchants = await Merchant.find({
+      location: req.params.location
     });
 
-    if (!user) {
-      res.status(404).send({
-        error: "No se encontró al usuario",
-      });
+    if (merchants.length > 0) {
+      res.send(merchants);
     } else {
-      const merchant = await Merchant.findOne({
-        owner: user._id,
-        _id: req.params.location,
-      }).populate({
-        path: "owner",
-        select: ["username"],
+      res.status(404).send({
+        error: "No se encontraron cazadores en esa localización"
       });
-
-      if (merchant) {
-        res.send(merchant);
-      } else {
-        res.status(404).send();
-      }
     }
   } catch (error) {
     res.status(500).send(error);
@@ -207,40 +157,30 @@ APImerchant.get("/merchants/:username/:location", async (req, res) => {
 });
 
 /**
- * @route DELETE /merchants/:username/:type
- * @description Elimina un mercader por tipo/especialidad.
+ * @route GET /merchants/type/:type
+ * @description Obtiene los mercaderes registrados por tipo
  *
- * @param {string} req.params.username - Nombre de usuario asociado.
- * @param {string} req.params.type - Tipo del mercader.
+ * @param {string} req.params.tye - Tipo de los mercaderes a consultar.
  *
- * @returns {200 OK} Mercader eliminado.
- * @returns {404 Not Found} Usuario o mercader no encontrado.
- * @returns {500 Internal Server Error} Error interno del servidor.
+ * @returns {200 OK} Lista de mercaderes de ese tipo.
+ * @returns {404 Not Found} No hay mercaderes de ese tipo.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * GET /merchants/type/General
  */
-APImerchant.delete("/merchants/:username/:type", async (req, res) => {
+APImerchant.get("/merchants/race/:race", async (req, res) => {
   try {
-    const user = await User.findOne({
-      username: req.params.username,
-    })
+    const merchants = await Merchant.find({
+      race: req.params.race
+    });
 
-    if (!user) {
-      res.status(404).send({
-        error: "No se encontró al usuario",
-      });
+    if (merchants.length > 0) {
+      res.send(merchants);
     } else {
-      const merchant = await Merchant.findOne({
-        owner: user._id,
-        _id: req.params.type,
-      }).populate({
-        path: "owner",
-        select: ["username"],
+      res.status(404).send({
+        error: "No se encontraron cazadores de esa raza"
       });
-
-      if (merchant) {
-        res.send(merchant);
-      } else {
-        res.status(404).send();
-      }
     }
   } catch (error) {
     res.status(500).send(error);
@@ -248,62 +188,55 @@ APImerchant.delete("/merchants/:username/:type", async (req, res) => {
 });
 
 /**
- * @route PATCH /merchants/:username/:id
- * @description Actualiza los datos de un mercader por ID.
+ * @route PATCH /merchants/:id
+ * @description Actualiza un mecader por su ID
  *
- * @param {string} req.params.username - Nombre de usuario asociado.
  * @param {string} req.params.id - ID del mercader a actualizar.
- * @param {string} req.body.name - Nuevo nombre del mercader.
- * @param {string} req.body.type - Nueva especialidad del mercader.
- * @param {string} req.body.location - Nueva localización del mercader.
+ * @param {string} req.body.name - Nombre del mercader.
+ * @param {string} req.body.type - Tipo del mercader (Options: 'Human' | 'Elf' | 'Dwarf' | 'Orc' | 'Goblin' | 'Vampire' | 'Werewolf' | 'Demon' | 'Undead').
+ * @param {string} req.body.location - Localización del mercader.
  *
- * @returns {200 OK} Mercader actualizado correctamente.
- * @returns {400 Bad Request} Campos inválidos para actualización.
- * @returns {404 Not Found} Usuario o mercader no encontrado.
- * @returns {500 Internal Server Error} Error interno del servidor.
+ * @returns {200 OK} Merchant actualizado correctamente.
+ * @returns {400 Bad Request} Faltan campos requeridos en el cuerpo de la petición.
+ * @returns {404 Not Found} No se encontró el mercader.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * PATCH /merchants/6818e84ab66205e8b1ed04f0
+ * {
+ *   "name": "Geralt",
+ *   "type": "Armorer",
+ *   "location": "Astera"
+ * }
  */
-APImerchant.patch("/merchants/:username/:id", async (req, res) => {
+APImerchant.patch("/merchants/:id", async (req, res) => {
   try {
-    const user = await User.findOne({
-      username: req.params.username,
-    });
+    const allowedUpdates = ["name", "type", "location"];
+    const actualUpdates = Object.keys(req.body);
+    const isValidUpdate = actualUpdates.every((update) =>
+      allowedUpdates.includes(update)
+    );
 
-    if (!user) {
-      res.status(404).send({
-        error: "No se encontró al usuario",
+    if (!isValidUpdate) {
+      res.status(400).send({
+        error: "La actualización no está permitida"
       });
     } else {
-      const allowedUpdates = ["name", "type", "location"];
-      const actualUpdates = Object.keys(req.body);
-      const isValidUpdate = actualUpdates.every((update) =>
-        allowedUpdates.includes(update),
+      const merchant = await Merchant.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
       );
 
-      if (!isValidUpdate) {
-        res.status(400).send({
-          error: "La actualización no está permitida",
-        });
+      if (merchant) {
+        res.send(merchant);
       } else {
-        const merchant = await Merchant.findOneAndUpdate(
-          {
-            owner: user._id,
-            _id: req.params.id,
-          },
-          req.body,
-          {
-            new: true,
-            runValidators: true,
-          },
-        ).populate({
-          path: "owner",
-          select: ["username"],
+        res.status(404).send({
+          error: "No se encontró el cazador"
         });
-
-        if (merchant) {
-          res.send(merchant);
-        } else {
-          res.status(404).send();
-        }
       }
     }
   } catch (error) {
@@ -312,41 +245,114 @@ APImerchant.patch("/merchants/:username/:id", async (req, res) => {
 });
 
 /**
- * @route DELETE /merchants/:username/:id
- * @description Elimina un mercader por ID.
+ * @route PATCH /merchants/name/:name
+ * @description Actualiza un mercader por su nombre
  *
- * @param {string} req.params.username - Nombre de usuario asociado.
- * @param {string} req.params.id - ID del mercader a eliminar.
+ * @param {string} req.params.name - Nombre del mercader a actualizar.
+ * @param {string} req.body.name - Nuevo nombre del mercader.
+ * @param {string} req.body.type - Tipo del mercader (Options: 'Blacksmith' | 'Alchemist' | 'Armorer' | 'Herbalist' | 'General Goods' | 'Weapons' | 'Other').
+ * @param {string} req.body.location - Localización del cazador.
  *
- * @returns {200 OK} Mercader eliminado correctamente.
- * @returns {404 Not Found} Usuario o mercader no encontrado.
- * @returns {500 Internal Server Error} Error interno del servidor.
+ * @returns {200 OK} Hunter actualizado correctamente.
+ * @returns {400 Bad Request} Faltan campos requeridos en el cuerpo de la petición.
+ * @returns {404 Not Found} No se encontró el cazador.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * PATCH /merchant/name/Geralt
+ * {
+ *   "name": "Geralt de Rivia",
+ *   "type": "Blacksmith",
+ *   "location": "Kaer Morhen"
+ * }
  */
-APImerchant.delete("/merchants/:username/:id", async (req, res) => {
+APImerchant.patch("/merchants/name/:name", async (req, res) => {
   try {
-    const user = await User.findOne({
-      username: req.params.username,
-    });
+    const allowedUpdates = ["name", "type", "location"];
+    const actualUpdates = Object.keys(req.body);
+    const isValidUpdate = actualUpdates.every((update) =>
+      allowedUpdates.includes(update)
+    );
 
-    if (!user) {
-      res.status(404).send({
-        error: "No se encontró al usuario",
+    if (!isValidUpdate) {
+      res.status(400).send({
+        error: "La actualización no está permitida"
       });
     } else {
-      const merchant = await Merchant.findOneAndDelete({
-        owner: user._id,
-        _id: req.params.id,
-      }).populate({
-        path: "owner",
-        select: ["username"],
-      });
+      const merchant = await Merchant.findOneAndUpdate(
+        { name: req.params.name },
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
       if (merchant) {
         res.send(merchant);
+      } else {
+        res.status(404).send({
+          error: "No se encontró el cazador"
+        });
       }
-      else {
-        res.status(404).send();
-      }
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**
+ * @route DELETE /merchant/:id
+ * @description Borra a un mercader por su ID
+ *
+ * @param {string} req.params.id - Id del mercader.
+ *
+ * @returns {200 OK} Mercader eliminado correctamente.
+ * @returns {404 Not Found} No se encontró el mercader.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * DELETE /merchant/6818e84ab66205e8b1ed04f0
+ */
+APImerchant.delete("/merchants/:id", async (req, res) => {
+  try {
+    const merchant = await Merchant.findByIdAndDelete(req.params.id);
+
+    if (merchant) {
+      res.send(merchant);
+    } else {
+      res.status(404).send({
+        error: "No se encontró el cazador"
+      });
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**
+ * @route DELETE /merchants/name/:name
+ * @description Borra a un mercader por su nombre
+ *
+ * @param {string} req.params.name - Nombre del mercader.
+ *
+ * @returns {200 OK} Mercader eliminado correctamente.
+ * @returns {404 Not Found} No se encontró el mercader.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * DELETE /merchants/name/Geralt
+ */
+APImerchant.delete("/merchants/name/:name", async (req, res) => {
+  try {
+    const merchant = await Merchant.findOneAndDelete({ name: req.params.name });
+
+    if (merchant) {
+      res.send(merchant);
+    } else {
+      res.status(404).send({
+        error: "No se encontró el cazador"
+      });
     }
   } catch (error) {
     res.status(500).send(error);
