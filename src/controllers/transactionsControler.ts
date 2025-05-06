@@ -3,7 +3,7 @@ import { Good } from '../models/goods.js';
 import { Hunter } from '../models/hunters.js';
 import { Merchant } from '../models/merchant.js';
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
+//import mongoose from 'mongoose';
 import { Types } from 'mongoose';
 
 /**
@@ -24,7 +24,6 @@ interface CreateTransactionRequestBody {
 export const createTransaction = async (req: Request, res: Response) => {
   try {
     const { transactionType, personName, items } = req.body as CreateTransactionRequestBody;
-
     // Validar que se proporcionen los campos necesarios
     if (!transactionType || !personName || !items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
@@ -32,7 +31,6 @@ export const createTransaction = async (req: Request, res: Response) => {
         message: 'Campos requeridos incompletos o inválidos'
       });
     }
-
     // Buscar la persona (cazador o mercader) según el tipo de transacción
     let person;
     if (transactionType === 'purchase') {
@@ -40,20 +38,16 @@ export const createTransaction = async (req: Request, res: Response) => {
     } else {
       person = await Merchant.findOne({ name: personName });
     }
-
     if (!person) {
       return res.status(404).json({
         success: false,
         message: `${personName} no encontrado`
       });
     }
-
     const personType = person instanceof Hunter ? 'Hunter' : 'Merchant';
-
     // Procesar los ítems de la transacción
     const transactionItems: TransactionItemInterface[] = [];
     let totalAmount = 0;
-
     // Si es una compra (hunter compra a la posada)
     if (transactionType === 'purchase') {
       // Verificar que existen todos los bienes y hay stock suficiente
@@ -104,7 +98,6 @@ export const createTransaction = async (req: Request, res: Response) => {
           });
           await good.save();
         }
-
         // Añadir ítem a la transacción - usamos un precio de compra ligeramente menor al valor del bien
         const buyPrice = good.value * 0.7; // Compramos a un 70% del valor de venta
         transactionItems.push({
@@ -116,7 +109,6 @@ export const createTransaction = async (req: Request, res: Response) => {
         totalAmount += item.quantity * buyPrice;
       }
     }
-
     // Crear la transacción
     const newTransaction = new Transaction({
       transactionType,
@@ -128,12 +120,10 @@ export const createTransaction = async (req: Request, res: Response) => {
       date: new Date()
     });
     await newTransaction.save();
-    
     return res.status(201).json({
       success: true,
       data: newTransaction
     });
-
   } catch (error) {
     console.error('Error al crear la transacción:', error);
     return res.status(500).json({
@@ -169,7 +159,6 @@ export const getTransactions = async (req: Request, res: Response) => {
         query.transactionType = transactionType;
       }
     }
-
     const transactions = await Transaction.find(query)
       .sort({ date: -1 }) // Ordenar por fecha descendente (más reciente primero)
       // .populate({
@@ -210,7 +199,6 @@ export const getTransactionById = async (req: Request, res: Response) => {
         message: 'Transacción no encontrada'
       });
     }
-
     return res.status(200).json({
       success: true,
       data: transaction
@@ -229,48 +217,39 @@ export const getTransactionById = async (req: Request, res: Response) => {
  * Actualizar una transacción por su ID
  */
 export const updateTransaction = async (req: Request, res: Response) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     // Buscar la transacción original
-    const originalTransaction = await Transaction.findById(req.params.id).session(session);
+    const originalTransaction = await Transaction.findById(req.params.id);
     if (!originalTransaction) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(404).json({
         success: false,
         message: 'Transacción no encontrada'
       });
     }
-
     // Restaurar el stock original (revertir la transacción)
     if (originalTransaction.transactionType === 'purchase') {
       // Si era una compra, devolver los productos al inventario
       for (const item of originalTransaction.items) {
-        const good = await Good.findById(item.goodId).session(session);
+        const good = await Good.findById(item.goodId);
         if (good) {
           good.stock += item.quantity;
-          await good.save({ session });
+          await good.save();
         }
       }
     } else {
       // Si era una venta, quitar los productos del inventario
       for (const item of originalTransaction.items) {
-        const good = await Good.findById(item.goodId).session(session);
+        const good = await Good.findById(item.goodId);
         if (good) {
           good.stock -= item.quantity;
-          
           // Verificar que no quede stock negativo
           if (good.stock < 0) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({
               success: false,
               message: `No se puede actualizar. Stock insuficiente para ${good.name}`
             });
           }
-          await good.save({ session });
+          await good.save();
         }
       }
     }
@@ -284,7 +263,6 @@ export const updateTransaction = async (req: Request, res: Response) => {
       personId: originalTransaction.personId,
       personType: originalTransaction.personType,
     };
-
     // Actualizar la transacción
     const updatedTransaction = await Transaction.findByIdAndUpdate(
       req.params.id,
@@ -292,21 +270,13 @@ export const updateTransaction = async (req: Request, res: Response) => {
       { 
         new: true,
         runValidators: true,
-        session
       }
     );
-
-    // Confirmar la transacción en MongoDB
-    await session.commitTransaction();
-    session.endSession();
-
     return res.status(200).json({
       success: true,
       data: updatedTransaction
     });
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error('Error al actualizar transacción:', error);
     return res.status(500).json({
       success: false,
@@ -320,70 +290,49 @@ export const updateTransaction = async (req: Request, res: Response) => {
  * Eliminar una transacción por su ID
  */
 export const deleteTransaction = async (req: Request, res: Response) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     // Buscar la transacción a eliminar
-    const transaction = await Transaction.findById(req.params.id).session(session);
-    
+    const transaction = await Transaction.findById(req.params.id);
     if (!transaction) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(404).json({
         success: false,
         message: 'Transacción no encontrada'
       });
     }
-
     // Revertir los efectos de la transacción sobre el inventario
     if (transaction.transactionType === 'purchase') {
       // Si era una compra de un cazador, devolver los bienes al inventario
       for (const item of transaction.items) {
-        const good = await Good.findById(item.goodId).session(session);
+        const good = await Good.findById(item.goodId);
         if (good) {
           good.stock += item.quantity;
-          await good.save({ session });
+          await good.save();
         }
       }
     } else {
       // Si era una venta de un mercader, quitar los bienes del inventario
       for (const item of transaction.items) {
-        const good = await Good.findById(item.goodId).session(session);
+        const good = await Good.findById(item.goodId);
         if (good) {
           good.stock -= item.quantity;
-          
           // Verificar que no quede stock negativo
           if (good.stock < 0) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({
               success: false,
               message: `No se puede eliminar. Stock insuficiente para ${good.name}`
             });
           }
-          
-          await good.save({ session });
+          await good.save();
         }
       }
     }
-
     // Eliminar la transacción
-    await Transaction.findByIdAndDelete(req.params.id).session(session);
-
-    // Confirmar la transacción en MongoDB
-    await session.commitTransaction();
-    session.endSession();
-
+    await Transaction.findByIdAndDelete(req.params.id);
     return res.status(200).json({
       success: true,
       message: 'Transacción eliminada correctamente'
     });
   } catch (error) {
-    // Si hay algún error, abortar la transacción
-    await session.abortTransaction();
-    session.endSession();
-    
     console.error('Error al eliminar transacción:', error);
     return res.status(500).json({
       success: false,
