@@ -2,7 +2,7 @@ import { describe, test, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { app } from '../src/app.js';
-import { Merchant } from '../src/models/merchants.js';
+import { Merchant } from '../src/models/merchant.js';
 import { Hunter } from '../src/models/hunters.js';
 import { Good } from '../src/models/goods.js';
 import { Transaction } from '../src/models/transactions.js';

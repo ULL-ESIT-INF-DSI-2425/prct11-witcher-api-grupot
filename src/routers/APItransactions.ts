@@ -9,8 +9,7 @@ import { Merchant } from '../models/merchants.js';
 export const APItransaction = express.Router();
 
 
-// --- Helper functions ---
-
+// --- Funcione auxiliares ---
 
 /**
  * Valida que el array de bienes tenga estructura correcta
