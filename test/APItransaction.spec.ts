@@ -11,7 +11,7 @@ import { Transaction } from '../src/models/transactions.js';
 // Única conexión a la DB de pruebas
 beforeAll(async () => {
   if (mongoose.connection.readyState === 0) {
-    await mongoose.connect(process.env.MONGODB_URI_TEST || 'mongodb://localhost:27017/posada-test');
+    await mongoose.connect(process.env.MONGODB_URI_TEST || 'mongodb://localhost:27017/posada-lobo-blanco-test');
   }
 });
 
