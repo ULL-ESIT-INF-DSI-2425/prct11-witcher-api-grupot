@@ -6,7 +6,7 @@
 // import { Hunter } from '../src/models/hunters.js';
 // import { Good } from '../src/models/goods.js';
 // import { Transaction } from '../src/models/transactions.js';
-import { describe, expect, test } from 'vitest';
+import { describe, test } from 'vitest';
 
 // // Única conexión a la DB de pruebas
 // beforeAll(async () => {
