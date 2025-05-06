@@ -1,5 +1,4 @@
 import { Schema, model, Document } from 'mongoose';
-//import { UserDocumentInterface } from './users.js';
 
 /**
  * Interfaz que define la estructura del documento de mercader
@@ -8,7 +7,6 @@ export interface MerchantDocumentInterface extends Document {
   name: string,
   type: 'Blacksmith' | 'Alchemist' | 'Armorer' | 'Herbalist' | 'General Goods' | 'Weapons' | 'Other',
   location: string,
-  //owner: UserDocumentInterface,
 }
 
 /**
@@ -37,12 +35,7 @@ const MerchantSchema = new Schema<MerchantDocumentInterface>(
       trim: true,
       required: [true, 'El origen del mercader es obligatorio'],
       minlength: [2, 'El origen debe tener al menos 2 caracteres']
-    }//,
-    // owner: {
-    //   type: Schema.Types.ObjectId,
-    //   required: true,
-    //   ref: 'User'
-    // }
+    }
   }
 );
 
