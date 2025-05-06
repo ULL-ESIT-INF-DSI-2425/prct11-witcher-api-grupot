@@ -1,12 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { describe, test, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, test, expect, beforeAll, afterEach } from "vitest";
 import request from "supertest";
 import { app } from "../src/app.js";
 import { Hunter } from "../src/models/hunters.js";
 import mongoose from "mongoose";
-
-// Variable para almacenar un ID de cazador para pruebas
-let hunterTestId;
 
 // Antes de todas las pruebas, nos aseguramos de estar conectados a la base de datos de prueba
 beforeAll(async () => {
@@ -30,13 +26,13 @@ afterEach(async () => {
   }
 });
 
-// Después de todas las pruebas, mantenemos la conexión abierta
-// para evitar conflictos con otras pruebas o con el servidor
-afterAll(async () => {
-  // No cerramos la conexión para evitar problemas con otras pruebas
-  // Si realmente necesitas cerrarla, asegúrate de que no haya otras pruebas ejecutándose
-  // await mongoose.connection.close();
-});
+// // Después de todas las pruebas, mantenemos la conexión abierta
+// // para evitar conflictos con otras pruebas o con el servidor
+// afterAll(async () => {
+//   // No cerramos la conexión para evitar problemas con otras pruebas
+//   // Si realmente necesitas cerrarla, asegúrate de que no haya otras pruebas ejecutándose
+//   // await mongoose.connection.close();
+// });
 
 describe("Hunters API Tests", () => {
   // TEST: Creación de un cazador
@@ -56,9 +52,6 @@ describe("Hunters API Tests", () => {
       expect(response.body.name).toBe("Geralt");
       expect(response.body.race).toBe("Human");
       expect(response.body.location).toBe("Astera");
-
-      // Guardamos el ID para pruebas posteriores
-      hunterTestId = response.body._id;
     });
 
     test("should handle validation errors", async () => {
