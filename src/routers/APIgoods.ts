@@ -167,10 +167,10 @@ APIgoods.get("/goods/category/:category", async (req, res) => {
  * @example
  * GET /goods/material/Wood
  */
-APIgoods.get("/goods/category/:category", async (req, res) => {
+APIgoods.get("/goods/material/:material", async (req, res) => {
   try {
     const goods = await Good.find({
-      category: req.params.category
+      material: req.params.material
     });
 
     if (goods.length > 0) {
@@ -301,7 +301,7 @@ APIgoods.patch("/goods/name/:name", async (req, res) => {
  *
  * @param {string} req.params.id - Id del bien.
  *
- * @returns {200 OK} Cazador eliminado correctamente.
+ * @returns {200 OK} Objeto eliminado correctamente.
  * @returns {404 Not Found} No se encontró el bien.
  * @returns {500 Internal Server Error} Error del servidor.
  *
@@ -330,12 +330,12 @@ APIgoods.delete("/goods/:id", async (req, res) => {
  *
  * @param {string} req.params.name - Nombre del bien.
  *
- * @returns {200 OK} Cazador eliminado correctamente.
+ * @returns {200 OK} objeto eliminado correctamente.
  * @returns {404 Not Found} No se encontró el bien.
  * @returns {500 Internal Server Error} Error del servidor.
  *
  * @example
- * DELETE /goods/name/Geralt
+ * DELETE /goods/name/Diamante
  */
 APIgoods.delete("/goods/name/:name", async (req, res) => {
   try {
