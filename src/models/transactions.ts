@@ -1,5 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
-import { UserDocumentInterface } from './users.js';
+//import { UserDocumentInterface } from './users.js';
 
 /**
  * Interfaz para items en transacciones
@@ -21,7 +21,7 @@ export interface TransactionDocumentInterface extends Document {
   personName: string;
   items: TransactionItemInterface[];
   totalAmount: number;
-  owner: UserDocumentInterface;
+  //owner: UserDocumentInterface;
 }
 
 /**
@@ -94,12 +94,12 @@ const TransactionSchema = new Schema<TransactionDocumentInterface>(
       type: Number,
       required: [true, 'El importe total es obligatorio'],
       min: [0, 'El importe total no puede ser negativo']
-    },
-    owner: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      ref: 'User'
     }
+    // owner: {
+    //   type: Schema.Types.ObjectId,
+    //   required: true,
+    //   ref: 'User'
+    // }
   }
 );
 

@@ -1,5 +1,5 @@
 import { Schema, model, Document } from "mongoose";
-import { UserDocumentInterface } from "./users.js";
+//import { UserDocumentInterface } from "./users.js";
 
 /**
  * Interfaz que define la estructura del documento de bien
@@ -20,7 +20,7 @@ export interface GoodDocumentInterface extends Document {
   value: number;
   stock: number;
   weight: number;
-  owner: UserDocumentInterface;
+  //owner: UserDocumentInterface;
 }
 
 /**
@@ -77,12 +77,12 @@ const GoodSchema = new Schema<GoodDocumentInterface>({
     type: Number,
     min: [0, "El peso no puede ser negativo"],
     default: 1,
-  },
-  owner: {
-    type: Schema.Types.ObjectId,
-    required: true,
-    ref: "User",
-  },
+  }
+  // owner: {
+  //   type: Schema.Types.ObjectId,
+  //   required: true,
+  //   ref: "User",
+  // },
 });
 
 export const Good = model<GoodDocumentInterface>("Good", GoodSchema);
