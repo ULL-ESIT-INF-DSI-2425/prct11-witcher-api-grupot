@@ -254,8 +254,8 @@ APImerchant.delete("/merchants/:username/:type", async (req, res) => {
  * @param {string} req.params.username - Nombre de usuario asociado.
  * @param {string} req.params.id - ID del mercader a actualizar.
  * @param {string} req.body.name - Nuevo nombre del mercader.
+ * @param {string} req.body.type - Nueva especialidad del mercader.
  * @param {string} req.body.location - Nueva localización del mercader.
- * @param {string} req.body.breed - Nueva raza del mercader.
  *
  * @returns {200 OK} Mercader actualizado correctamente.
  * @returns {400 Bad Request} Campos inválidos para actualización.
@@ -273,7 +273,7 @@ APImerchant.patch("/merchants/:username/:id", async (req, res) => {
         error: "No se encontró al usuario",
       });
     } else {
-      const allowedUpdates = ["name", "location", "breed"];
+      const allowedUpdates = ["name", "type", "location"];
       const actualUpdates = Object.keys(req.body);
       const isValidUpdate = actualUpdates.every((update) =>
         allowedUpdates.includes(update),

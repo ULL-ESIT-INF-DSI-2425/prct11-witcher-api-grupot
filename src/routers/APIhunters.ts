@@ -297,7 +297,7 @@ APIhunter.patch("/hunters/:username/:id", async (req, res) => {
         error: "No se encontró al usuario",
       });
     } else {
-      const allowedUpdates = ["name", "location", "breed"];
+      const allowedUpdates = ["name", "location", "race"];
       const actualUpdates = Object.keys(req.body);
       const isValidUpdate = actualUpdates.every((update) =>
         allowedUpdates.includes(update),
