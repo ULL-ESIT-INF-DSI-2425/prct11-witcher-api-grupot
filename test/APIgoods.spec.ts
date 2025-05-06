@@ -6,8 +6,8 @@ import { Good } from "../src/models/goods.js";
 import mongoose from "mongoose";
 
 
-// Variable para almacenar un ID de bien para pruebas\ nlet goodTestId;
-
+// Variable para almacenar un ID de bien para pruebas\
+let goodTestId;
 
 // Antes de todas las pruebas, nos aseguramos de estar conectados a la base de datos de prueba
 beforeAll(async () => {
