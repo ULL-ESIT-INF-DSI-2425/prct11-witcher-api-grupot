@@ -37,7 +37,7 @@ APIgoods.post("/goods", async (req, res) => {
 
 /**
  * @route GET /goods
- * @description Obtiene todos los bienes
+ * @desc Obtiene todos los bienes
  *
  * @returns {200 OK} Lista de bienes.
  * @returns {404 Not Found} No hay bienes registrados.
