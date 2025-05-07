@@ -485,3 +485,88 @@ describe("Merchants API Tests", () => {
     });
   });
 });
+
+
+describe("GET /merchants", () => {
+  test("should return merchants matching the query", async () => {
+    await request(app).post("/merchants").send({
+      name: "Iker",
+      type: "General Goods",
+      location: "Bosque Oscuro",
+    });
+
+    const response = await request(app)
+      .get("/merchants?name=Iker")
+      .expect(200);
+
+    expect(response.body[0].name).toBe("Iker");
+  });
+
+  test("should return 404 if no merchants match the query", async () => {
+    const response = await request(app)
+      .get("/merchants?name=Fantasma")
+      .expect(404);
+
+    expect(response.body.error).toBe("No se encontraron merchants con esos filtros");
+  });
+});
+
+describe("PATCH /merchants", () => {
+  test("should update a hunter using query string", async () => {
+    await request(app).post("/merchants").send({
+      name: "Iker",
+      type: "General Goods",
+      location: "Bosque Oscuro",
+    });
+
+    const response = await request(app)
+      .patch("/merchants?name=Iker")
+      .send({ location: "Montaña Roja" })
+      .expect(200);
+
+    expect(response.body.location).toBe("Montaña Roja");
+  });
+
+  test("should return 400 for invalid update field", async () => {
+    const response = await request(app)
+      .patch("/merchants?name=Iker")
+      .send({ arma: "Ballesta" })
+      .expect(400);
+
+    expect(response.body.error).toBe("La actualización no está permitida");
+  });
+
+  test("should return 404 if hunter not found", async () => {
+    const response = await request(app)
+      .patch("/merchants?name=Desconocido")
+      .send({ location: "Mar Profundo" })
+      .expect(404);
+
+    expect(response.body.error).toBe("No se encontró el mercader");
+  });
+});
+
+describe("DELETE /merchants", () => {
+  test("should delete a hunter using query string", async () => {
+    await request(app).post("/merchants").send({
+      name: "Iker",
+      type: "General Goods",
+      location: "Bosque Oscuro",
+    });
+    const response = await request(app)
+      .delete("/merchants?name=Iker")
+      .expect(200);
+    expect(response.body.name).toBe("Iker");
+    // Verificar que el cazador fue eliminado
+    const deletedMerchant = await Merchant.findOne({ name: "Iker" });
+    expect(deletedMerchant).toBeNull();
+  });
+  test("should return 404 if hunter not found", async () => {
+    const response = await request(app)
+      .delete("/merchants?name=Fantasma")
+      .expect(404);
+
+    expect(response.body.error).toBe("No se encontró el mercader para eliminar");
+  }
+  );
+});

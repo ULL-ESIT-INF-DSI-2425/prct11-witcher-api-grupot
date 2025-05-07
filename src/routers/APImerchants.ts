@@ -49,14 +49,28 @@ APImerchant.post("/merchants", async (req, res) => {
  */
 APImerchant.get("/merchants", async (req, res) => {
   try {
-    const merchants = await Merchant.find();
+    const filters = req.query;
 
-    if (merchants.length !== 0) {
-      res.send(merchants);
+    // Si no hay filtros (es decir, la query está vacía)
+    if (Object.keys(filters).length === 0) {
+      const merchants = await Merchant.find();
+      if (merchants.length !== 0) {
+        res.send(merchants);
+      } else {
+        res.status(404).send({
+          error: "No hay mercaderes registrados",
+        });
+      }
     } else {
-      res.status(404).send({
-        error: "No hay mercaderes registrados",
-      });
+      // Hay filtros: aplicamos query
+      const merchants = await Merchant.find(filters);
+      if (merchants.length > 0) {
+        res.send(merchants);
+      } else {
+        res.status(404).send({
+          error: "No se encontraron merchants con esos filtros",
+        });
+      }
     }
   } catch (error) {
     res.status(500).send(error);
@@ -352,6 +366,85 @@ APImerchant.delete("/merchants/name/:name", async (req, res) => {
     } else {
       res.status(404).send({
         error: "No se encontró el mercader"
+      });
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**
+ * @route PATCH /merchants
+ * @description Actualiza un mercader utilizando query strings como filtro.
+ *
+ * @param {object} req.query - Filtros para buscar el mercader (ej. name=Iker).
+ * @param {object} req.body - Campos a actualizar.
+ *
+ * @returns {200 OK} Bien actualizado.
+ * @returns {400 Bad Request} Actualización inválida.
+ * @returns {404 Not Found} No se encontró el mercader.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * PATCH /merchants?name=Iker
+ */
+APImerchant.patch("/merchants", async (req, res) => {
+  try {
+    const allowedUpdates = ["name", "type", "location"];
+    const actualUpdates = Object.keys(req.body);
+    const isValidUpdate = actualUpdates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!isValidUpdate) {
+      res.status(400).send({
+        error: "La actualización no está permitida"
+      });
+    } else {
+      const merchant = await Merchant.findOneAndUpdate(
+        req.query,
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+      if (merchant) {
+        res.send(merchant);
+      } else {
+        res.status(404).send({
+          error: "No se encontró el mercader"
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**
+ * @route DELETE /merchants
+ * @description Elimina un mercaer utilizando query strings como filtro.
+ *
+ * @param {object} req.query - Filtros para encontrar el mercader (ej. name=Iker).
+ *
+ * @returns {200 OK} Cazador eliminado.
+ * @returns {404 Not Found} No se encontró el mercader.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * DELETE /merchants?name=Iker
+ */
+APImerchant.delete("/merchants", async (req, res) => {
+  try {
+    const merchant = await Merchant.findOneAndDelete(req.query);
+
+    if (merchant) {
+      res.send(merchant);
+    } else {
+      res.status(404).send({
+        error: "No se encontró el mercader para eliminar"
       });
     }
   } catch (error) {
