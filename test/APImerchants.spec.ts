@@ -26,14 +26,6 @@ afterEach(async () => {
   }
 });
 
-// Después de todas las pruebas, mantenemos la conexión abierta
-// para evitar conflictos con otras pruebas o con el servidor
-// afterAll(async () => {
-//   // No cerramos la conexión para evitar problemas con otras pruebas
-//   // Si realmente necesitas cerrarla, asegúrate de que no haya otras pruebas ejecutándose
-//   // await mongoose.connection.close();
-// });
-
 describe("Merchants API Tests", () => {
   // TEST: Creación de un mercader
   describe("POST /merchants", () => {

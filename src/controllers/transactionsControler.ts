@@ -3,7 +3,6 @@ import { Good } from '../models/goods.js';
 import { Hunter } from '../models/hunters.js';
 import { Merchant } from '../models/merchant.js';
 import { Request, Response } from 'express';
-//import mongoose from 'mongoose';
 import { Types } from 'mongoose';
 
 /**
