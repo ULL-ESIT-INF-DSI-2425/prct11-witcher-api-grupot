@@ -49,19 +49,34 @@ APIhunter.post("/hunters", async (req, res) => {
  */
 APIhunter.get("/hunters", async (req, res) => {
   try {
-    const hunters = await Hunter.find();
+    const filters = req.query;
 
-    if (hunters.length !== 0) {
-      res.send(hunters);
+    // Si no hay filtros (es decir, la query está vacía)
+    if (Object.keys(filters).length === 0) {
+      const hunters = await Hunter.find();
+      if (hunters.length !== 0) {
+        res.send(hunters);
+      } else {
+        res.status(404).send({
+          error: "No hay cazadores registrados",
+        });
+      }
     } else {
-      res.status(404).send({
-        error: "No hay cazadores registrados",
-      });
+      // Hay filtros: aplicamos query
+      const hunters = await Hunter.find(filters);
+      if (hunters.length > 0) {
+        res.send(hunters);
+      } else {
+        res.status(404).send({
+          error: "No se encontraron cazadores con esos filtros",
+        });
+      }
     }
   } catch (error) {
     res.status(500).send(error);
   }
 });
+
 
 /**
  * @route GET /hunters/:id
@@ -352,6 +367,87 @@ APIhunter.delete("/hunters/name/:name", async (req, res) => {
     } else {
       res.status(404).send({
         error: "No se encontró el cazador"
+      });
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+// QUERY STRINGS
+
+/**
+ * @route PATCH /hunters
+ * @description Actualiza un cazador utilizando query strings como filtro.
+ *
+ * @param {object} req.query - Filtros para buscar el cazador (ej. name=Iker).
+ * @param {object} req.body - Campos a actualizar.
+ *
+ * @returns {200 OK} Bien actualizado.
+ * @returns {400 Bad Request} Actualización inválida.
+ * @returns {404 Not Found} No se encontró el cazador.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * PATCH /hunters?name=Iker
+ */
+APIhunter.patch("/hunters", async (req, res) => {
+  try {
+    const allowedUpdates = ["name", "race", "location"];
+    const actualUpdates = Object.keys(req.body);
+    const isValidUpdate = actualUpdates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!isValidUpdate) {
+      res.status(400).send({
+        error: "La actualización no está permitida"
+      });
+    } else {
+      const hunter = await Hunter.findOneAndUpdate(
+        req.query,
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+      if (hunter) {
+        res.send(hunter);
+      } else {
+        res.status(404).send({
+          error: "No se encontró el cazador"
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**
+ * @route DELETE /hunters
+ * @description Elimina un bien utilizando query strings como filtro.
+ *
+ * @param {object} req.query - Filtros para encontrar el cazador (ej. name=Iker).
+ *
+ * @returns {200 OK} Cazador eliminado.
+ * @returns {404 Not Found} No se encontró el cazador.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * DELETE /hunters?name=Iker
+ */
+APIhunter.delete("/hunters", async (req, res) => {
+  try {
+    const hunter = await Hunter.findOneAndDelete(req.query);
+
+    if (hunter) {
+      res.send(hunter);
+    } else {
+      res.status(404).send({
+        error: "No se encontró el cazador para eliminar"
       });
     }
   } catch (error) {

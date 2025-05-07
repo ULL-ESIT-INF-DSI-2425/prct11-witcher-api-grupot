@@ -48,14 +48,28 @@ APIgoods.post("/goods", async (req, res) => {
  */
 APIgoods.get("/goods", async (req, res) => {
   try {
-    const goods = await Good.find();
+    const filters = req.query;
 
-    if (goods.length !== 0) {
-      res.send(goods);
+    // Si no hay filtros (es decir, la query está vacía)
+    if (Object.keys(filters).length === 0) {
+      const goods = await Good.find();
+      if (goods.length !== 0) {
+        res.send(goods);
+      } else {
+        res.status(404).send({
+          error: "No hay bienes registrados",
+        });
+      }
     } else {
-      res.status(404).send({
-        error: "No hay bienes registrados",
-      });
+      // Hay filtros: aplicamos query
+      const goods = await Good.find(filters);
+      if (goods.length > 0) {
+        res.send(goods);
+      } else {
+        res.status(404).send({
+          error: "No se encontraron bienes con esos filtros",
+        });
+      }
     }
   } catch (error) {
     res.status(500).send(error);
@@ -347,6 +361,85 @@ APIgoods.delete("/goods/name/:name", async (req, res) => {
     } else {
       res.status(404).send({
         error: "No se encontró el bien"
+      });
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**
+ * @route PATCH /goods/query
+ * @description Actualiza un bien utilizando query strings como filtro.
+ *
+ * @param {object} req.query - Filtros para buscar el bien (ej. name=Espada).
+ * @param {object} req.body - Campos a actualizar.
+ *
+ * @returns {200 OK} Bien actualizado.
+ * @returns {400 Bad Request} Actualización inválida.
+ * @returns {404 Not Found} No se encontró el bien.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * PATCH /goods/query?name=Espada
+ */
+APIgoods.patch("/goods", async (req, res) => {
+  try {
+    const allowedUpdates = ["name", "description", "category", "material", "value", "stock", "weight"];
+    const actualUpdates = Object.keys(req.body);
+    const isValidUpdate = actualUpdates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!isValidUpdate) {
+      res.status(400).send({
+        error: "La actualización no está permitida"
+      });
+    } else {
+      const good = await Good.findOneAndUpdate(
+        req.query,
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+      if (good) {
+        res.send(good);
+      } else {
+        res.status(404).send({
+          error: "No se encontró el bien"
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**
+ * @route DELETE /goods
+ * @description Elimina un bien utilizando query strings como filtro.
+ *
+ * @param {object} req.query - Filtros para encontrar el bien (ej. name=Espada).
+ *
+ * @returns {200 OK} Bien eliminado.
+ * @returns {404 Not Found} No se encontró el bien.
+ * @returns {500 Internal Server Error} Error del servidor.
+ *
+ * @example
+ * DELETE /goods?name=Espada
+ */
+APIgoods.delete("/goods", async (req, res) => {
+  try {
+    const good = await Good.findOneAndDelete(req.query);
+
+    if (good) {
+      res.send(good);
+    } else {
+      res.status(404).send({
+        error: "No se encontró el bien para eliminar"
       });
     }
   } catch (error) {

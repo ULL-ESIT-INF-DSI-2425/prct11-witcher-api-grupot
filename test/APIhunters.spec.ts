@@ -381,3 +381,87 @@ describe("Hunters API Tests", () => {
     });
   });
 });
+
+describe("GET /hunters", () => {
+  test("should return hunters matching the query", async () => {
+    await request(app).post("/hunters").send({
+      name: "Iker",
+      race: "Human",
+      location: "Bosque Oscuro",
+    });
+
+    const response = await request(app)
+      .get("/hunters?name=Iker")
+      .expect(200);
+
+    expect(response.body[0].name).toBe("Iker");
+  });
+
+  test("should return 404 if no hunters match the query", async () => {
+    const response = await request(app)
+      .get("/hunters?name=Fantasma")
+      .expect(404);
+
+    expect(response.body.error).toBe("No se encontraron cazadores con esos filtros");
+  });
+});
+
+describe("PATCH /hunters", () => {
+  test("should update a hunter using query string", async () => {
+    await request(app).post("/hunters").send({
+      name: "Iker",
+      race: "Human",
+      location: "Bosque Oscuro",
+    });
+
+    const response = await request(app)
+      .patch("/hunters?name=Iker")
+      .send({ location: "Montaña Roja" })
+      .expect(200);
+
+    expect(response.body.location).toBe("Montaña Roja");
+  });
+
+  test("should return 400 for invalid update field", async () => {
+    const response = await request(app)
+      .patch("/hunters?name=Iker")
+      .send({ arma: "Ballesta" })
+      .expect(400);
+
+    expect(response.body.error).toBe("La actualización no está permitida");
+  });
+
+  test("should return 404 if hunter not found", async () => {
+    const response = await request(app)
+      .patch("/hunters?name=Desconocido")
+      .send({ location: "Mar Profundo" })
+      .expect(404);
+
+    expect(response.body.error).toBe("No se encontró el cazador");
+  });
+});
+
+describe("DELETE /hunters", () => {
+  test("should delete a hunter using query string", async () => {
+    await request(app).post("/hunters").send({
+      name: "Iker",
+      race: "Human",
+      location: "Bosque Oscuro",
+    });
+    const response = await request(app)
+      .delete("/hunters?name=Iker")
+      .expect(200);
+    expect(response.body.name).toBe("Iker");
+    // Verificar que el cazador fue eliminado
+    const deletedHunter = await Hunter.findOne({ name: "Iker" });
+    expect(deletedHunter).toBeNull();
+  });
+  test("should return 404 if hunter not found", async () => {
+    const response = await request(app)
+      .delete("/hunters?name=Fantasma")
+      .expect(404);
+
+    expect(response.body.error).toBe("No se encontró el cazador para eliminar");
+  }
+  );
+});

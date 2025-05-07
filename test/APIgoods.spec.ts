@@ -526,3 +526,119 @@ describe("Goods API Tests", () => {
     });
   });
 });
+
+describe("GET /goods with querys", () => {
+  test("should return goods matching the query", async () => {
+    await request(app).post("/goods").send({
+      name: "Espada Larga",
+      description: "A fine weapon",
+      category: "Weapon",
+      material: "Steel",
+      value: 300,
+      stock: 5,
+      weight: 4,
+    });
+
+    const response = await request(app)
+      .get("/goods?name=Espada Larga")
+      .expect(200);
+
+    expect(response.body.length).toBeGreaterThan(0);
+    expect(response.body[0].name).toBe("Espada Larga");
+  });
+
+  test("should return 404 if no goods match the query", async () => {
+    const response = await request(app)
+      .get("/goods?name=NoExiste")
+      .expect(404);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toBe("No se encontraron bienes con esos filtros");
+  });
+});
+
+describe("PATCH /goods with query", () => {
+  test("should update a good using query string", async () => {
+    await request(app).post("/goods").send({
+      name: "Espada Rota",
+      description: "A not so fine weapon",
+      category: "Weapon",
+      material: "Iron",
+      value: 50,
+      stock: 2,
+      weight: 3,
+    });
+
+    const response = await request(app)
+      .patch("/goods?name=Espada Rota")
+      .send({ value: 75 })
+      .expect(200);
+
+    expect(response.body.name).toBe("Espada Rota");
+    expect(response.body.value).toBe(75);
+  });
+
+  test("should return 400 if update contains invalid field", async () => {
+    await request(app).post("/goods").send({
+      name: "Espada Mágica",
+      description: "A quite fine weapon",
+      category: "Weapon",
+      material: "Silver",
+      value: 1000,
+      stock: 1,
+      weight: 2,
+    });
+
+    const response = await request(app)
+      .patch("/goods?name=Espada Mágica")
+      .send({ magia: true })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toBe("La actualización no está permitida");
+  });
+
+  test("should return 404 if no good matches query", async () => {
+    const response = await request(app)
+      .patch("/goods?name=Inexistente")
+      .send({ value: 999 })
+      .expect(404);
+
+    expect(response.body.error).toBe("No se encontró el bien");
+  });
+});
+
+describe("DELETE /goods with querys", () => {
+  test("should delete a good using query string", async () => {
+    await request(app).post("/goods").send({
+      name: "Espada Vieja",
+      description: "A rusty weapon",
+      category: "Weapon",
+      material: "Wood",
+      value: 20,
+      stock: 1,
+      weight: 1,
+    });
+
+    const response = await request(app)
+      .delete("/goods?name=Espada Vieja")
+      .expect(200);
+
+    expect(response.body.name).toBe("Espada Vieja");
+
+    // Verificamos que el bien ya no existe
+    const getResponse = await request(app)
+      .get("/goods?name=Espada Vieja")
+      .expect(404);
+
+    expect(getResponse.body.error).toBe("No se encontraron bienes con esos filtros");
+  });
+
+  test("should return 404 if no good matches query", async () => {
+    const response = await request(app)
+      .delete("/goods?name=Inexistente")
+      .expect(404);
+
+    expect(response.body.error).toBe("No se encontró el bien para eliminar");
+  });
+});
