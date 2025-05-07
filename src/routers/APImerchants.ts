@@ -55,7 +55,7 @@ APImerchant.get("/merchants", async (req, res) => {
       res.send(merchants);
     } else {
       res.status(404).send({
-        error: "No hay cazadores registrados",
+        error: "No hay mercaderes registrados",
       });
     }
   } catch (error) {
@@ -86,7 +86,7 @@ APImerchant.get("/merchants/:id", async (req, res) => {
       res.send(merchant);
     } else {
       res.status(404).send({
-        error: "No se encontró el cazador"
+        error: "No se encontró el mercader"
       });
     }
   } catch (error) {
@@ -117,7 +117,7 @@ APImerchant.get("/merchants/name/:name", async (req, res) => {
       res.send(merchant);
     } else {
       res.status(404).send({
-        error: "No se encontró el cazador"
+        error: "No se encontró el mercader"
       });
     }
   } catch (error) {
@@ -127,12 +127,12 @@ APImerchant.get("/merchants/name/:name", async (req, res) => {
 
 /**
  * @route GET /merchants/location/:location
- * @description Obtiene los cazadores registrados por localización
+ * @description Obtiene los mercaderes registrados por localización
  *
- * @param {string} req.params.location - localización de los cazadores a consultar.
+ * @param {string} req.params.location - localización de los mercaderes a consultar.
  *
- * @returns {200 OK} Lista de cazadores en esa localización.
- * @returns {404 Not Found} No hay cazadores en esa localización.
+ * @returns {200 OK} Lista de mercaderes en esa localización.
+ * @returns {404 Not Found} No hay mercaderes en esa localización.
  * @returns {500 Internal Server Error} Error del servidor.
  *
  * @example
@@ -148,7 +148,7 @@ APImerchant.get("/merchants/location/:location", async (req, res) => {
       res.send(merchants);
     } else {
       res.status(404).send({
-        error: "No se encontraron cazadores en esa localización"
+        error: "No se encontraron mercaderes en esa localización"
       });
     }
   } catch (error) {
@@ -160,26 +160,26 @@ APImerchant.get("/merchants/location/:location", async (req, res) => {
  * @route GET /merchants/type/:type
  * @description Obtiene los mercaderes registrados por tipo
  *
- * @param {string} req.params.tye - Tipo de los mercaderes a consultar.
+ * @param {string} req.params.type - Tipo de los mercaderes a consultar.
  *
  * @returns {200 OK} Lista de mercaderes de ese tipo.
  * @returns {404 Not Found} No hay mercaderes de ese tipo.
  * @returns {500 Internal Server Error} Error del servidor.
  *
  * @example
- * GET /merchants/type/General
+ * GET /merchants/type/Alchemist
  */
-APImerchant.get("/merchants/race/:race", async (req, res) => {
+APImerchant.get("/merchants/type/:type", async (req, res) => {
   try {
     const merchants = await Merchant.find({
-      race: req.params.race
+      type: req.params.type
     });
 
     if (merchants.length > 0) {
       res.send(merchants);
     } else {
       res.status(404).send({
-        error: "No se encontraron cazadores de esa raza"
+        error: "No se encontraron mercaderes de esa raza"
       });
     }
   } catch (error) {
@@ -235,7 +235,7 @@ APImerchant.patch("/merchants/:id", async (req, res) => {
         res.send(merchant);
       } else {
         res.status(404).send({
-          error: "No se encontró el cazador"
+          error: "No se encontró el mercader"
         });
       }
     }
@@ -251,11 +251,11 @@ APImerchant.patch("/merchants/:id", async (req, res) => {
  * @param {string} req.params.name - Nombre del mercader a actualizar.
  * @param {string} req.body.name - Nuevo nombre del mercader.
  * @param {string} req.body.type - Tipo del mercader (Options: 'Blacksmith' | 'Alchemist' | 'Armorer' | 'Herbalist' | 'General Goods' | 'Weapons' | 'Other').
- * @param {string} req.body.location - Localización del cazador.
+ * @param {string} req.body.location - Localización del mercader.
  *
  * @returns {200 OK} Hunter actualizado correctamente.
  * @returns {400 Bad Request} Faltan campos requeridos en el cuerpo de la petición.
- * @returns {404 Not Found} No se encontró el cazador.
+ * @returns {404 Not Found} No se encontró el mercader.
  * @returns {500 Internal Server Error} Error del servidor.
  *
  * @example
@@ -292,7 +292,7 @@ APImerchant.patch("/merchants/name/:name", async (req, res) => {
         res.send(merchant);
       } else {
         res.status(404).send({
-          error: "No se encontró el cazador"
+          error: "No se encontró el mercader"
         });
       }
     }
@@ -322,7 +322,7 @@ APImerchant.delete("/merchants/:id", async (req, res) => {
       res.send(merchant);
     } else {
       res.status(404).send({
-        error: "No se encontró el cazador"
+        error: "No se encontró el mercader"
       });
     }
   } catch (error) {
@@ -351,7 +351,7 @@ APImerchant.delete("/merchants/name/:name", async (req, res) => {
       res.send(merchant);
     } else {
       res.status(404).send({
-        error: "No se encontró el cazador"
+        error: "No se encontró el mercader"
       });
     }
   } catch (error) {
