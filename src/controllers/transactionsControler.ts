@@ -29,7 +29,6 @@ export const createTransaction = async (req: Request, res: Response) => {
         message: 'Campos requeridos incompletos o inválidos'
       });
     }
-    // Buscar la persona (cazador o mercader) según el tipo de transacción
     let person;
     if (transactionType === 'purchase') {
       person = await Hunter.findOne({ name: personName });
@@ -139,18 +138,15 @@ export const getTransactions = async (req: Request, res: Response) => {
     const { personName, startDate, endDate, transactionType } = req.query;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = {};
-    // Fitrar por nombre
     if (personName) {
       query.personName = personName;
     }
-    // Filtrar por fechas
     if (startDate && endDate) {
       query.date = {
         $gte: new Date(startDate as string), // $gte -> greater than or equal to
         $lte: new Date(endDate as string) // $lte -> less than or equal to
       };
     }
-    // Filtrar por tipo de transacción
     if (transactionType && ['purchase', 'sale', 'all'].includes(transactionType as string)) {
       if (transactionType !== 'all') {
         query.transactionType = transactionType;
@@ -204,7 +200,6 @@ export const getTransactionById = async (req: Request, res: Response) => {
  */
 export const updateTransaction = async (req: Request, res: Response) => {
   try {
-    // Buscar la transacción original
     const originalTransaction = await Transaction.findById(req.params.id);
     if (!originalTransaction) {
       return res.status(404).json({
@@ -276,7 +271,6 @@ export const updateTransaction = async (req: Request, res: Response) => {
  */
 export const deleteTransaction = async (req: Request, res: Response) => {
   try {
-    // Buscar la transacción a eliminar
     const transaction = await Transaction.findById(req.params.id);
     if (!transaction) {
       return res.status(404).json({
@@ -284,7 +278,6 @@ export const deleteTransaction = async (req: Request, res: Response) => {
         message: 'Transacción no encontrada'
       });
     }
-    // Revertir los efectos de la transacción sobre el inventario
     if (transaction.transactionType === 'purchase') {
       // Si era una compra de un cazador, devolver los bienes al inventario
       for (const item of transaction.items) {
