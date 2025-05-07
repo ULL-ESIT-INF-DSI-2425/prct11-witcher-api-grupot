@@ -241,7 +241,6 @@ export const updateTransaction = async (req: Request, res: Response) => {
     }
 
     // Si llegamos a este punto, crear una nueva transacción con los datos actualizados
-    // (Esto es simplificado, en un caso real habría que procesar los nuevos items)
     const updatedData = {
       ...req.body,
       // No permitimos cambiar ciertos campos
