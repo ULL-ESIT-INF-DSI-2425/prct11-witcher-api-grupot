@@ -1,5 +1,12 @@
-import express from 'express';
-import { Hunter } from '../models/hunters.js';
+import express from "express";
+import { Hunter } from "../models/hunters.js";
+import {
+  getAllHunters,
+  getHunterById,
+  getHunterByName,
+  getHuntersByLocation,
+  getHuntersByRace,
+} from "../controllers/huntersControler.js";
 
 export const APIhunter = express.Router();
 
@@ -26,7 +33,7 @@ export const APIhunter = express.Router();
 APIhunter.post("/hunters", async (req, res) => {
   try {
     const hunter = new Hunter({
-      ...req.body
+      ...req.body,
     });
 
     await hunter.save();
@@ -47,36 +54,7 @@ APIhunter.post("/hunters", async (req, res) => {
  * @example
  * GET /hunters
  */
-APIhunter.get("/hunters", async (req, res) => {
-  try {
-    const filters = req.query;
-
-    // Si no hay filtros (es decir, la query está vacía)
-    if (Object.keys(filters).length === 0) {
-      const hunters = await Hunter.find();
-      if (hunters.length !== 0) {
-        res.send(hunters);
-      } else {
-        res.status(404).send({
-          error: "No hay cazadores registrados",
-        });
-      }
-    } else {
-      // Hay filtros: aplicamos query
-      const hunters = await Hunter.find(filters);
-      if (hunters.length > 0) {
-        res.send(hunters);
-      } else {
-        res.status(404).send({
-          error: "No se encontraron cazadores con esos filtros",
-        });
-      }
-    }
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
-
+APIhunter.get("/hunters", getAllHunters);
 
 /**
  * @route GET /hunters/:id
@@ -91,23 +69,7 @@ APIhunter.get("/hunters", async (req, res) => {
  * @example
  * GET /hunters/6818e84ab66205e8b1ed04f0
  */
-APIhunter.get("/hunters/:id", async (req, res) => {
-  try {
-    const hunter = await Hunter.findOne({
-      _id: req.params.id,
-    });
-
-    if (hunter) {
-      res.send(hunter);
-    } else {
-      res.status(404).send({
-        error: "No se encontró el cazador"
-      });
-    }
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
+APIhunter.get("/hunters/:id", getHunterById);
 
 /**
  * @route GET /hunters/name/:name
@@ -122,23 +84,7 @@ APIhunter.get("/hunters/:id", async (req, res) => {
  * @example
  * GET /hunters/name/Geralt
  */
-APIhunter.get("/hunters/name/:name", async (req, res) => {
-  try {
-    const hunter = await Hunter.findOne({
-      name: req.params.name
-    });
-
-    if (hunter) {
-      res.send(hunter);
-    } else {
-      res.status(404).send({
-        error: "No se encontró el cazador"
-      });
-    }
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
+APIhunter.get("/hunters/name/:name", getHunterByName);
 
 /**
  * @route GET /hunters/location/:location
@@ -153,23 +99,7 @@ APIhunter.get("/hunters/name/:name", async (req, res) => {
  * @example
  * GET /hunters/location/Astera
  */
-APIhunter.get("/hunters/location/:location", async (req, res) => {
-  try {
-    const hunters = await Hunter.find({
-      location: req.params.location
-    });
-
-    if (hunters.length > 0) {
-      res.send(hunters);
-    } else {
-      res.status(404).send({
-        error: "No se encontraron cazadores en esa localización"
-      });
-    }
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
+APIhunter.get("/hunters/location/:location", getHuntersByLocation);
 
 /**
  * @route GET /hunters/race/:race
@@ -184,23 +114,7 @@ APIhunter.get("/hunters/location/:location", async (req, res) => {
  * @example
  * GET /hunters/race/Human
  */
-APIhunter.get("/hunters/race/:race", async (req, res) => {
-  try {
-    const hunters = await Hunter.find({
-      race: req.params.race
-    });
-
-    if (hunters.length > 0) {
-      res.send(hunters);
-    } else {
-      res.status(404).send({
-        error: "No se encontraron cazadores de esa raza"
-      });
-    }
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
+APIhunter.get("/hunters/race/:race", getHuntersByRace);
 
 /**
  * @route PATCH /hunters/:id
@@ -229,28 +143,24 @@ APIhunter.patch("/hunters/:id", async (req, res) => {
     const allowedUpdates = ["name", "location", "race"];
     const actualUpdates = Object.keys(req.body);
     const isValidUpdate = actualUpdates.every((update) =>
-      allowedUpdates.includes(update)
+      allowedUpdates.includes(update),
     );
 
     if (!isValidUpdate) {
       res.status(400).send({
-        error: "La actualización no está permitida"
+        error: "La actualización no está permitida",
       });
     } else {
-      const hunter = await Hunter.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
+      const hunter = await Hunter.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true,
+      });
 
       if (hunter) {
         res.send(hunter);
       } else {
         res.status(404).send({
-          error: "No se encontró el cazador"
+          error: "No se encontró el cazador",
         });
       }
     }
@@ -286,12 +196,12 @@ APIhunter.patch("/hunters/name/:name", async (req, res) => {
     const allowedUpdates = ["name", "location", "race"];
     const actualUpdates = Object.keys(req.body);
     const isValidUpdate = actualUpdates.every((update) =>
-      allowedUpdates.includes(update)
+      allowedUpdates.includes(update),
     );
 
     if (!isValidUpdate) {
       res.status(400).send({
-        error: "La actualización no está permitida"
+        error: "La actualización no está permitida",
       });
     } else {
       const hunter = await Hunter.findOneAndUpdate(
@@ -300,14 +210,14 @@ APIhunter.patch("/hunters/name/:name", async (req, res) => {
         {
           new: true,
           runValidators: true,
-        }
+        },
       );
 
       if (hunter) {
         res.send(hunter);
       } else {
         res.status(404).send({
-          error: "No se encontró el cazador"
+          error: "No se encontró el cazador",
         });
       }
     }
@@ -337,7 +247,7 @@ APIhunter.delete("/hunters/:id", async (req, res) => {
       res.send(hunter);
     } else {
       res.status(404).send({
-        error: "No se encontró el cazador"
+        error: "No se encontró el cazador",
       });
     }
   } catch (error) {
@@ -366,7 +276,7 @@ APIhunter.delete("/hunters/name/:name", async (req, res) => {
       res.send(hunter);
     } else {
       res.status(404).send({
-        error: "No se encontró el cazador"
+        error: "No se encontró el cazador",
       });
     }
   } catch (error) {
@@ -396,28 +306,24 @@ APIhunter.patch("/hunters", async (req, res) => {
     const allowedUpdates = ["name", "race", "location"];
     const actualUpdates = Object.keys(req.body);
     const isValidUpdate = actualUpdates.every((update) =>
-      allowedUpdates.includes(update)
+      allowedUpdates.includes(update),
     );
 
     if (!isValidUpdate) {
       res.status(400).send({
-        error: "La actualización no está permitida"
+        error: "La actualización no está permitida",
       });
     } else {
-      const hunter = await Hunter.findOneAndUpdate(
-        req.query,
-        req.body,
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
+      const hunter = await Hunter.findOneAndUpdate(req.query, req.body, {
+        new: true,
+        runValidators: true,
+      });
 
       if (hunter) {
         res.send(hunter);
       } else {
         res.status(404).send({
-          error: "No se encontró el cazador"
+          error: "No se encontró el cazador",
         });
       }
     }
@@ -447,7 +353,7 @@ APIhunter.delete("/hunters", async (req, res) => {
       res.send(hunter);
     } else {
       res.status(404).send({
-        error: "No se encontró el cazador para eliminar"
+        error: "No se encontró el cazador para eliminar",
       });
     }
   } catch (error) {
