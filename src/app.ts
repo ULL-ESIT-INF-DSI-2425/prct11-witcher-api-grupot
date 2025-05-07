@@ -8,6 +8,8 @@ import { APIhunter } from './routers/APIhunters.js';
 import { APItransactions } from './routers/APItransactions.js';
 
 export const app = express();
+app.disable("x-powered-by"); // problema de seguridad de sonarqube
+
 app.use(express.json());
 
 app.use(APIgoods);
