@@ -15,7 +15,7 @@ APItransactions.get('/transactions/:id', async (req, res) => {
   await getTransactionById(req, res);
 });
 
-APItransactions.patch('/transactions', async (req, res) => {
+APItransactions.patch('/transactions/:id', async (req, res) => {
   await updateTransaction(req, res);
 });
 

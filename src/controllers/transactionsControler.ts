@@ -24,7 +24,6 @@ interface CreateTransactionRequestBody {
 export const createTransaction = async (req: Request, res: Response) => {
   try {
     const { transactionType, personName, items } = req.body as CreateTransactionRequestBody;
-    // Validar que se proporcionen los campos necesarios
     if (!transactionType || !personName || !items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
         success: false,
@@ -45,7 +44,6 @@ export const createTransaction = async (req: Request, res: Response) => {
       });
     }
     const personType = person instanceof Hunter ? 'Hunter' : 'Merchant';
-    // Procesar los ítems de la transacción
     const transactionItems: TransactionItemInterface[] = [];
     let totalAmount = 0;
     // Si es una compra (hunter compra a la posada)
@@ -75,7 +73,7 @@ export const createTransaction = async (req: Request, res: Response) => {
           quantity: item.quantity,
           unitPrice: good.value
         });
-        totalAmount += item.quantity;
+        totalAmount += item.quantity * good.value;
       }
     } else { // Si es una venta (merchant vende a la posada)
       for (const item of items) {
@@ -109,7 +107,7 @@ export const createTransaction = async (req: Request, res: Response) => {
         totalAmount += item.quantity * buyPrice;
       }
     }
-    // Crear la transacción
+    // Crear la transacción 
     const newTransaction = new Transaction({
       transactionType,
       personId: person._id,
@@ -160,18 +158,7 @@ export const getTransactions = async (req: Request, res: Response) => {
       }
     }
     const transactions = await Transaction.find(query)
-      .sort({ date: -1 }) // Ordenar por fecha descendente (más reciente primero)
-      // .populate({
-      //   path: 'personId',
-      //   select: 'name' 
-      // })
-      // .populate({
-      //   path: 'items',
-      //   populate: {
-      //     path: 'goodName'
-      //   }
-      // });
-
+      .sort({ date: -1 }) 
     return res.status(200).json({
       success: true,
       count: transactions.length,
