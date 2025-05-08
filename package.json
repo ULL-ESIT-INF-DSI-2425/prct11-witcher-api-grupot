@@ -26,8 +26,13 @@
   "homepage": "https://github.com/ULL-ESIT-INF-DSI-2425/prct11-witcher-api-grupot#readme",
   "devDependencies": {
     "@eslint/js": "^9.25.1",
+    "@types/connect": "^3.4.38",
+    "@types/estree": "^1.0.7",
     "@types/express": "^5.0.1",
+    "@types/hast": "^3.0.4",
+    "@types/request": "^2.48.12",
     "@types/supertest": "^6.0.3",
+    "@types/unist": "^3.0.3",
     "@types/validator": "^13.15.0",
     "@vitest/coverage-v8": "^3.1.3",
     "env-cmd": "^10.1.0",

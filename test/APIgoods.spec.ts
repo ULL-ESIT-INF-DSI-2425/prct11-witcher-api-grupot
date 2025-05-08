@@ -15,7 +15,7 @@ beforeAll(async () => {
     // Si ya hay una conexión, verificamos que sea a la base de datos de prueba
     const dbName = mongoose.connection.db?.databaseName;
     if (dbName !== 'posada-lobo-blanco-test') {
-      console.warn(`⚠️ Advertencia: Tests ejecutándose en la base de datos "${dbName}" en lugar de "posada-lobo-blanco-test"`);
+      console.warn(`Tests ejecutándose en la base de datos "${dbName}" en lugar de "posada-lobo-blanco-test"`);
     }
   }
 });
